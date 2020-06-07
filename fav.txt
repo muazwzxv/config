@@ -1,0 +1,15 @@
+xterm16.vim
+Tomorrow-Night.vim
+basic-dark.vim
+deus.vim
+PaperColor.vim
+
+
+
+zsh theme 
+- zhann
+
+
+
+iterm theme
+- dracula
