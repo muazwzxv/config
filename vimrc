@@ -37,20 +37,25 @@ Plugin 'dense-analysis/ale'
 Plugin 'vimwiki/vimwiki'
 Plugin 'hugolgst/vimsence'
 Plugin 'powerline/powerline'
+Plugin 'morhetz/gruvbox'
+
 " All of your Plugins must be added before the following line
 call vundle#end()
 filetype plugin indent on
 
+let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git\|target\|dist'
+
 " --------------------------------
 " Pretty things
 " --------------------------------
-autocmd VimEnter * NERDTree
+"autocmd VimEnter * NERDTree
 " autocmd BufEnter * NERDTreeMirror
 nmap <silent> <C-t> :NERDTreeToggle<CR>
 nmap <silent> <F2> :NERDTreeFind<CR>
 
 syntax on
-colorscheme onedark
+set background=dark
+colorscheme gruvbox
 let g:ycm_python_binary_path = 'python3'
 " Set Airline bar theme
 let g:airline_theme='bubblegum'
