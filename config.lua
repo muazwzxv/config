@@ -1,17 +1,12 @@
---[[
-lvim is the global options object
-
-Linters should be
-filled in as strings with either
-a global executable or a path to
-an executable
-]]
--- THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
+-- Read the docs: https://www.lunarvim.org/docs/configuration
+-- Video Tutorials: https://www.youtube.com/watch?v=sFA9kX-Ud_c&list=PLhoH5vyxr6QqGu0i7tt_XoVK9v-KvZ3m6
+-- Forum: https://www.reddit.com/r/lunarvim/
+-- Discord: https://discord.com/invite/Xb9B4Ny
 
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save.enabled = true
-lvim.colorscheme = "kanagawa-dragon"
+lvim.colorscheme = "catppuccin-mocha"
 
 -- to disable icons and use a minimalist setup, uncomment the following
 -- lvim.use_icons = true
@@ -19,7 +14,11 @@ lvim.colorscheme = "kanagawa-dragon"
 -- Optional
 vim.opt.relativenumber = true
 vim.opt.mouse = "a"
-
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+  command = "if mode() != 'c' | checktime | endif",
+  pattern = { "*" },
+})
 
 -- keymappings [view all the defaults by pressing <leader>Lk]
 lvim.leader = "space"
@@ -73,8 +72,9 @@ lvim.keys.normal_mode["<S-h>"] = ":bprevious<CR>"
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
 lvim.builtin.terminal.active = true
-lvim.builtin.nvimtree.setup.view.side = "left"
+lvim.builtin.nvimtree.setup.view.side = "right"
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = true
+lvim.builtin.nvimtree.setup.view.adaptive_size = true
 
 -- if you don't want all the parsers change this to a table of the ones you want
 lvim.builtin.treesitter.ensure_installed = {
@@ -192,6 +192,75 @@ lvim.plugins = {
   { "nanotech/jellybeans.vim" },
   { "alexvzyl/nordic.nvim" },
   { "wadackel/vim-dogrun" },
+  {
+    "folke/tokyonight.nvim",
+  },
+  {
+    "eddyekofo94/gruvbox-flat.nvim"
+  },
+  {
+    "nvim-lualine/lualine.nvim",
+  },
+
+  {
+    'wfxr/minimap.vim',
+    build = "cargo install --locked code-minimap",
+    -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
+    config = function()
+      vim.cmd("let g:minimap_width = 10")
+      vim.cmd("let g:minimap_auto_start = 1")
+      vim.cmd("let g:minimap_auto_start_win_enter = 1")
+    end,
+  },
+  {
+    "f-person/git-blame.nvim",
+    event = "BufRead",
+    config = function()
+      vim.cmd "highlight default link gitblame SpecialComment"
+      require("gitblame").setup { enabled = false }
+    end,
+  },
+  {
+    "rmagatti/goto-preview",
+    config = function()
+      require('goto-preview').setup {
+        width = 150,             -- Width of the floating window
+        height = 50,             -- Height of the floating window
+        default_mappings = true, -- Bind default mappings
+        debug = false,           -- Print debug information
+        opacity = nil,           -- 0-100 opacity level of the floating window where 100 is fully transparent.
+        post_open_hook = nil     -- A function taking two arguments, a buffer and a window to be ran as a hook.
+        -- You can use "default_mappings = true" setup option
+        -- Or explicitly set keybindings
+        -- vim.cmd("nnoremap gpd <cmd>lua require('goto-preview').goto_preview_definition()<CR>")
+        -- vim.cmd("nnoremap gpi <cmd>lua require('goto-preview').goto_preview_implementation()<CR>")
+        -- vim.cmd("nnoremap gP <cmd>lua require('goto-preview').close_all_win()<CR>")
+      }
+    end
+  },
+  {
+    "rose-pine/neovim",
+    config = function()
+      require('rose-pine').setup {
+        variant = "auto",      -- auto, main, moon, or dawn
+        dark_variant = "main", -- main, moon, or dawn
+        dim_inactive_windows = true,
+        extend_background_behind_borders = true,
+      }
+    end
+  },
+  {
+    "catppuccin/nvim",
+    config = function()
+      require('catppuccin').setup {
+        flavour = "auto",    -- latte, frappe, macchiato, mocha
+        transparent_background = false,
+        no_italic = true,    -- Force no italic
+        no_bold = true,      -- Force no bold
+        no_underline = true, -- Force no underline
+      }
+    end
+  },
 }
 
 ------------------------
@@ -222,10 +291,30 @@ dapgo.setup()
 ------------------------
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "gopls" })
 
+function Custom_capabilities()
+  local status_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+  if status_ok then
+    return cmp_nvim_lsp.default_capabilities()
+  end
+
+  local capabilities = vim.lsp.protocol.make_client_capabilities()
+  capabilities.textDocument.completion.completionItem.snippetSupport = true
+  capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = true
+  capabilities.textDocument.completion.completionItem.resolveSupport = {
+    properties = {
+      "documentation",
+      "detail",
+      "additionalTextEdits",
+    },
+  }
+
+  return capabilities
+end
+
 local lsp_manager = require "lvim.lsp.manager"
 lsp_manager.setup("golangci_lint_ls", {
   on_init = require("lvim.lsp").common_on_init,
-  capabilities = require("lvim.lsp").common_capabilities(),
+  capabilities = Custom_capabilities(),
 })
 
 lsp_manager.setup("gopls", {
@@ -250,14 +339,14 @@ lsp_manager.setup("gopls", {
     map("n", "<leader>DT", "<cmd>lua require('dap-go').debug_test()<cr>", "Debug Test")
   end,
   on_init = require("lvim.lsp").common_on_init,
-  capabilities = require("lvim.lsp").common_capabilities(),
+  capabilities = Custom_capabilities(),
   settings = {
     gopls = {
       usePlaceholders = true,
       gofumpt = true,
       codelenses = {
         generate = false,
-        gc_details = true,
+        gc_details = false,
         test = true,
         tidy = true,
       },
@@ -279,6 +368,7 @@ gopher.setup {
     iferr = "iferr",
   },
 }
+
 
 
 -- Autocommands (https://neovim.io/doc/user/atocmd.html)
