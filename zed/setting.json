@@ -9,7 +9,7 @@
 {
   "disable_ai": true,
   "project_panel": {
-    "dock": "right",
+    "dock": "right"
   },
   "icon_theme": "JetBrains New UI Icons (Dark)",
   "theme": "Tokyo Night",
@@ -21,13 +21,12 @@
   // "buffer_font_family": "JetBrainsMonoNL Nerd Font"
   "buffer_font_family": "FiraCode Nerd Font Propo",
   "buffer_font_features": {
-    "calt": true,
+    "calt": true
   },
   "languages": {
     "Ruby": {
       "format_on_save": "on",
-      "language_servers": ["solargraph", "rubocop", "ruby-lsp"],
-    },
-  },
+      "language_servers": ["solargraph", "rubocop", "ruby-lsp"]
+    }
+  }
 }
-
